@@ -1,4 +1,4 @@
-version: '3.6'
+version: '3.8'
 services:
     dev:
         container_name: nestjs_api_dev
@@ -9,6 +9,23 @@ services:
             dockerfile: ./Dockerfile
         command: npm run start:debug
         ports:
+            - 3334:3334
+            - 9229:9229
+        networks:
+            - nesjs-network
+        volumes:
+            - .:/usr/src/app
+            - /usr/src/app/node_modules
+        restart: unless-stopped
+    prod:
+        container_name: nestjs_api_prod
+        image: nestjs-api-prod:1.0.0
+        build:
+            context: .
+            target: production
+            dockerfile: ./Dockerfile
+        command: npm run start:prod
+        ports:
             - 3333:3333
             - 9229:9229
         networks:
@@ -17,7 +34,7 @@ services:
             - .:/usr/src/app
             - /usr/src/app/node_modules
         restart: unless-stopped
-    
+
 
 networks:
     nesjs-network:
