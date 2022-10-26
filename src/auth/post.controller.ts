@@ -1,8 +1,8 @@
 /* eslint-disable prettier/prettier */
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Header, Param, Post } from '@nestjs/common';
 import { PostService } from './post.service';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { CreatePostDto } from './create-auth';
+import CreatePostDto from './create-auth';
 
 @Controller('posts')
 export class PostController {
@@ -10,27 +10,13 @@ export class PostController {
     
     @Get()
     async getPosts() {
-        const posts = await this.postService.getPosts();
+        const posts = await this.postService.findAll();
         return posts;
     }
-
-    @Get(':postId')
-    async getCourse(@Param('postId') postId) {
-        const post = await this.postService.getPost(postId);
-        return post;
+    @Post('add')
+    async addCustomer(){
+      const posts = await this.postService.addNewCus();
+      return posts;
     }
-
-    @Post()
-    async addPost(@Body() CreatePostDto: CreatePostDto) {
-        const post = await this.postService.addPost(CreatePostDto);
-        return post;
-    }
-
-    @Delete(':id')
-    async deletePost(@Param('id') id: string) {
-        const post = await this.postService.deletePost(id);
-        return post;
-    }
-  
 }
 

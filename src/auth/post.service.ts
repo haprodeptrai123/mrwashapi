@@ -1,59 +1,57 @@
-import { HttpException, Injectable } from '@nestjs/common';
+/* eslint-disable prettier/prettier */
+import { HttpService } from '@nestjs/axios';
+import { Dependencies, Injectable, Logger } from '@nestjs/common';
+import { AxiosError } from 'axios';
+import { catchError, firstValueFrom, lastValueFrom } from 'rxjs';
+import CreatePostDto from './create-auth';
 
 @Injectable({})
+@Dependencies(HttpService)
 export class PostService {
-  posts = [
-    {
-      id: 1,
-      title: 'Chúng tôi là ai?',
-      description:
-        'Sun Asterisk chứa đựng ước mơ và mục tiêu kiến tạo nên thật nhiều những điều tốt đẹp cho xã hội của tập thể những chiến binh mặt trời.',
-      author: 'Sun*',
-      url: 'https://sun-asterisk.vn/ve-chung-toi/',
-    },
-    {
-      id: 2,
-      title: 'Chúng tôi làm gì?',
-      description:
-        'Là một Digital Creative Studio, Sun* luôn đề cao tinh thần làm chủ sản phẩm, tư duy sáng tạo trong mỗi dự án để mang đến những trải nghiệm "Awesome" nhất cho end-user',
-      author: 'Sun*',
-      url: 'https://sun-asterisk.vn/creative-engineering/',
-    },
-  ];
+  private readonly logger = new Logger(PostService.name);
 
-  getPosts(): Promise<any> {
-    return new Promise((resolve) => {
-      resolve(this.posts);
-    });
+  constructor(private readonly httpService: HttpService) {}
+  cus = {
+    active:true,
+    address:'string',
+    email:'string',
+    fullname:'string',
+    phone:'string',
+    
   }
-
-  getPost(postId): Promise<any> {
-    const id = Number(postId);
-    return new Promise((resolve) => {
-      const post = this.posts.find((post) => post.id === id);
-      if (!post) {
-        throw new HttpException('Post not found', 404);
-      }
-      resolve(post);
-    });
+  config = {
+    headers:{
+      'Content-Type': 'application/json',
+      'x-hasura-admin-secret': 'myadminsecretkey'
+    }
+    
+  };
+  async findAll(): Promise<CreatePostDto[]> {
+    const { data } = await firstValueFrom(
+      this.httpService.get('http://localhost:8080/api/rest/customer',this.config).pipe(
+        catchError((error: AxiosError) => {
+          this.logger.error(error.response.data);
+          throw 'An error happened!';
+        }),
+      ),
+    );
+    // dữ liệu trả về là object *json đã parse*
+    
+    console.log(data.laundry_service_customers[1].fullname);
+    console.log(data);
+    return data;
   }
-
-  addPost(post): Promise<any> {
-    return new Promise((resolve) => {
-      this.posts.push(post);
-      resolve(this.posts);
-    });
-  }
-
-  deletePost(postId): Promise<any> {
-    const id = Number(postId);
-    return new Promise((resolve) => {
-      const index = this.posts.findIndex((post) => post.id === id);
-      if (index === -1) {
-        throw new HttpException('Post not found', 404);
-      }
-      this.posts.splice(index, 1);
-      resolve(this.posts);
-    });
-  }
+  async addNewCus(): Promise<CreatePostDto[]> {
+    
+    const { data } = await lastValueFrom(
+      this.httpService.post('http://localhost:8080/api/rest/customer/add',JSON.stringify(this.cus),this.config).pipe(
+        catchError((error: AxiosError) => {
+          this.logger.error(error.response.data);
+          throw 'Another error happened!';
+        }),
+      ),
+    );
+    
+  return data;
+}
 }

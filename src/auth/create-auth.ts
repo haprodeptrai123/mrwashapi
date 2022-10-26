@@ -1,8 +1,10 @@
 /* eslint-disable prettier/prettier */
-export class CreatePostDto {
-  id: number;
-  title: string;
-  description: string;
-  author: string;
-  url: string;
+export default class CreatePostDto {
+  active:boolean;
+  address:string;
+  customer_id:string;
+  email:string;
+  fullname:string;
+  phone:string;
+  
 }
